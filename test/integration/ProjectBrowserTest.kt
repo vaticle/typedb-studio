@@ -18,6 +18,8 @@
 
 package com.vaticle.typedb.studio.test.integration
 
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import com.vaticle.typedb.studio.framework.material.Icon
 import com.vaticle.typedb.studio.service.Service
@@ -150,13 +152,14 @@ class ProjectBrowserTest : IntegrationTest() {
             clickIcon(composeRule, Icon.EXPAND)
 
             waitUntilNodeWithTextExists(composeRule, text = fileName)
+            composeRule.onNodeWithText(fileName).assertIsDisplayed()
 
             clickIcon(composeRule, Icon.COLLAPSE)
 
             waitUntilNodeWithTextExists(composeRule, text = testID)
 
-            delayAndRecompose(composeRule, Delays.FILE_IO)
-            composeRule.onNodeWithText(fileName).assertDoesNotExist()
+            delayAndRecompose(composeRule, Delays.RECOMPOSE)
+            composeRule.onNodeWithText(fileName).assertIsNotDisplayed()
         }
     }
 }
