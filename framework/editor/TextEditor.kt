@@ -90,7 +90,10 @@ import kotlin.math.ceil
 import kotlin.math.log10
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
 
 object TextEditor {
@@ -210,6 +213,7 @@ object TextEditor {
         internal val contextMenu = ContextMenu.State()
         internal var textAreaWidth by mutableStateOf(0.dp)
         internal var isFocused by mutableStateOf(true)
+        val coroutines = CoroutineScope(Default)
         internal var processor by mutableStateOf(initProcessor)
         internal val lineCount get() = content.size
         internal val lineHeight get() = target.lineHeight
@@ -469,12 +473,12 @@ object TextEditor {
                 )
             }
         }
-        if (state.isFocused) LaunchedEffect(cursor) {
+        LaunchedEffect(cursor) {
             visible = true
-            while (true) {
-                delay(BLINKING_FREQUENCY)
-                visible = !visible
-            }
+        }
+        LaunchedEffect(cursor, visible) {
+            delay(BLINKING_FREQUENCY)
+            visible = !visible
         }
     }
 
