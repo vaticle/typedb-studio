@@ -37,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -90,8 +91,8 @@ import kotlin.math.ceil
 import kotlin.math.log10
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
@@ -105,7 +106,7 @@ object TextEditor {
     private val RIGHT_PADDING = 32.dp
     private val DEFAULT_FONT_WIDTH = 7.dp
     private val CURSOR_LINE_PADDING = 0.dp
-    private val BLINKING_FREQUENCY = 500.milliseconds
+    private val BLINKING_FREQUENCY = 500.seconds
     private val END_OF_FILE_SPACE = 100.dp
     private val MAX_LINE_MIN_WIDTH: Dp = 100_000.dp // we need this cause Compose can't render components too large
     private val LOGGER = KotlinLogging.logger {}
@@ -213,7 +214,7 @@ object TextEditor {
         internal val contextMenu = ContextMenu.State()
         internal var textAreaWidth by mutableStateOf(0.dp)
         internal var isFocused by mutableStateOf(true)
-        val coroutines = CoroutineScope(Default)
+        var coroutines: CoroutineScope? = null
         internal var processor by mutableStateOf(initProcessor)
         internal val lineCount get() = content.size
         internal val lineHeight get() = target.lineHeight
@@ -304,6 +305,14 @@ object TextEditor {
                     }
                     TextArea(state, fontStyle, fontWidth, lineGap, showLine, onScroll)
                 }
+            }
+        }
+
+        state.coroutines = rememberCoroutineScope()
+        state.coroutines?.launch {
+            while (state.isFocused) {
+                delay(BLINKING_FREQUENCY)
+                state.target.visible = !state.target.visible
             }
         }
 
@@ -441,7 +450,6 @@ object TextEditor {
         state: State, line: GlyphLine, textLayout: TextLayoutResult?, font: TextStyle, fontWidth: Dp, lineGap: Dp
     ) {
         val cursor = state.target.cursor
-        var visible by remember { mutableStateOf(true) }
         val width = textLayout?.let {
             val textLayoutText = textLayout.layoutInput.text
             if (line.isEmpty() || textLayoutText.isEmpty()) DEFAULT_FONT_WIDTH
@@ -456,7 +464,7 @@ object TextEditor {
             toDP(it.getCursorRectSafely(charOffset).left, state.density)
         } ?: (width * cursor.col)
 
-        if (visible || !state.isFocused) {
+        if (state.target.visible || !state.isFocused) {
             Column(
                 modifier = Modifier.offset(x = offsetX, y = CURSOR_LINE_PADDING)
                     .width(width).height(state.lineHeight - CURSOR_LINE_PADDING * 2)
@@ -472,13 +480,6 @@ object TextEditor {
                     style = font
                 )
             }
-        }
-        LaunchedEffect(cursor) {
-            visible = true
-        }
-        LaunchedEffect(cursor, visible) {
-            delay(BLINKING_FREQUENCY)
-            visible = !visible
         }
     }
 

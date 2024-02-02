@@ -120,6 +120,7 @@ internal class InputTarget constructor(
         }
     }
 
+    var visible by mutableStateOf(true)
     internal val cursor: Cursor get() = if (!stickToBottom) _cursor else end
     internal var selection: Selection? by mutableStateOf(null); private set
     internal var density: Float by mutableStateOf(initDensity)

@@ -131,6 +131,7 @@ object StudioActions {
     }
 
     suspend fun delayAndRecompose(composeRule: ComposeContentTestRule, timeMillis: Int = Delays.RECOMPOSE) {
+        RuntimeException().printStackTrace()
         delay(timeMillis.toLong())
         composeRule.awaitIdle()
     }
