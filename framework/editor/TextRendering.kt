@@ -38,8 +38,8 @@ internal class TextRendering {
 
     private var results = initResults(0)
 
-    private fun initResults(initSize: Int): SnapshotStateList<TextLayoutResult?> =
-        mutableStateListOf<TextLayoutResult?>().apply { addAll(List(initSize) { null }) }
+    private fun initResults(initSize: Int): MutableList<TextLayoutResult?> =
+        mutableListOf<TextLayoutResult?>().apply { addAll(List(initSize) { null }) }
 
     fun reinitialize(initSize: Int) {
         results = initResults(initSize)
@@ -69,7 +69,7 @@ internal class TextRendering {
     }
 
     fun removeRange(startInc: Int, endExc: Int) {
-        results.removeRange(startInc, endExc)
+        for (i in startInc until endExc) results.removeAt(startInc)
     }
 
     fun addNewLines(index: Int, size: Int) {
