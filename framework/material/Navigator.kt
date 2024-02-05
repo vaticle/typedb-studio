@@ -423,10 +423,8 @@ object Navigator {
         val horScrollState = rememberScrollState()
         val verScrollAdapter = rememberScrollbarAdapter(state.scroller)
         val horScrollAdapter = rememberScrollbarAdapter(horScrollState)
-        val root: ItemState<T>? = state.entries.firstOrNull()
         if (state.entries.isNotEmpty()) Box(
-            modifier = modifier.pointerInput(root) { root?.let { onPointerInput(state, it) } }
-                .onGloballyPositioned { state.density = density; state.updateAreaSize(it.size) }
+            modifier = modifier.onGloballyPositioned { state.density = density; state.updateAreaSize(it.size) }
         ) {
             state.contextMenuFn?.let { fn -> ContextMenu.Popup(state.contextMenu) { fn(state.selected!!) } }
             LazyColumn(
