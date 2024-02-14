@@ -315,14 +315,14 @@ object Studio {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()) // Set UI style for Windows
     }
 
-    private fun configureDiagnostics() {
+    private fun configureDiagnostics(enabled: Boolean) {
         val releaseName = "TypeDB Studio@" + Version.VERSION;
         Sentry.init { options ->
-            options.setEnabled(true)
             options.setDsn("https://9c327cb98a925974587f98adb192a89b@o4506315929812992.ingest.sentry.io/4506355166806016")
             options.setEnableTracing(true)
             options.setSendDefaultPii(false)
             options.setRelease(releaseName)
+            options.setEnabled(enabled)
         }
         val user = User();
         user.setUsername(userID());
@@ -345,7 +345,7 @@ object Studio {
         androidx.compose.ui.window.application(exitProcessOnExit = false) {
             Theme.Material {
                 CompositionLocalProvider(
-                    LocalWindowExceptionHandlerFactory provides ExceptionHandler
+                        LocalWindowExceptionHandlerFactory provides ExceptionHandler
                 ) { window() }
             }
         }
@@ -356,9 +356,9 @@ object Studio {
         try {
             addShutdownHook()
             setConfigurations()
-            configureDiagnostics();
             Message.loadClasses()
             Service.data.initialise()
+            configureDiagnostics(Service.preference.diagnosticsReportingEnabled);
             while (!quit) {
                 application { MainWindow(::exitApplication) }
                 error?.let { exception ->

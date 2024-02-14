@@ -47,6 +47,10 @@ class PreferenceService(dataSrv: DataService) {
         get() = preferences.ignoredPaths ?: field
         set(value) = run { preferences.ignoredPaths = value }
 
+    var diagnosticsReportingEnabled: Boolean = Defaults.diagnosticsReportingEnabled
+        get() = preferences.diagnosticsReportingEnabled ?: field
+        set(value) = run { preferences.diagnosticsReportingEnabled = value }
+
     fun isIgnoredPath(path: Path): Boolean {
         val ignoredPaths = preferences.ignoredPaths ?: Defaults.ignoredPaths
         val relativePath = path.relativeTo(path.parent)
@@ -63,5 +67,6 @@ class PreferenceService(dataSrv: DataService) {
         val getQueryLimit = 1000L
         val ignoredPaths = listOf(".git")
         val transactionTimeoutMins = 60L
+        val diagnosticsReportingEnabled = true
     }
 }
